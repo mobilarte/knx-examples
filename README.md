@@ -1,2 +1,2 @@
 # knx-examples
-Short Examples for knx-go
+Short Examples for Using knx-go
