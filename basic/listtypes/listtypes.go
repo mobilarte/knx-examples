@@ -1,4 +1,5 @@
-// licensed under the mit license which can be found in the license file.
+// Copyright 2020 Martin Müller.
+// Licensed under the MIT license which can be found in the LICENSE file.
 
 package main
 
