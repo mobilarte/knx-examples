@@ -1,0 +1,101 @@
+package main
+
+// basic example from
+// https://dev.to/moficodes/build-your-first-rest-api-with-go-2gcj
+
+import (
+	"log"
+	"net/http"
+	"strconv"
+	"fmt"
+
+	"github.com/gorilla/mux"
+)
+
+func getLight(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	pathParams := mux.Vars(r)
+
+	lightId := -1
+	var err error
+	if val, ok := pathParams["lightId"]; ok {
+		lightId, err = strconv.Atoi(val)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"message": "erroneous id"}`))
+			return
+		}
+	}
+	action, ok := pathParams["action"]
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message": "erroneous action"}`))
+		return
+	}
+	fmt.Println("Servicing Rest API")
+	w.WriteHeader(http.StatusOK)
+	// fill in a struct, return json dump
+	s := fmt.Sprintf("{\"error\": \"\", \"lightId\": \"%d\", \"action\": \"%s\"}", lightId, action)
+	w.Write([]byte(s))
+}
+
+func getObject(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+        w.WriteHeader(http.StatusOK)
+	vars := mux.Vars(r)
+	b, _ := groupList.LookupByName(vars["name"])
+	w.Write(b)
+}
+
+func getWeather(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+        w.WriteHeader(http.StatusOK)
+	wind, _ := groupList.LookupByName("wind")
+	temperature, _ := groupList.LookupByName("temperatur")
+	lum_east, _ := groupList.LookupByName("helligkeit.ost")
+	lum_south, _ := groupList.LookupByName("helligkeit.süd")
+	lum_west, _ := groupList.LookupByName("helligkeit.west")
+	s := fmt.Sprintf("{\"wind\": %s, \"temperature\": %s, \"ost\": %s, \"süd\": %s, \"west\": %s}", 
+		wind, temperature, lum_east, lum_south, lum_west)
+	w.Write([]byte(s))
+}
+
+func getRoot(w http.ResponseWriter, r *http.Request) {
+        w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(http.StatusOK)
+        w.Write([]byte(`{"message": "get called"}`))
+}
+
+func notFound(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusNotFound)
+	w.Write([]byte(`{"message": "not found"}`))
+}
+
+func runRest () {
+	r := mux.NewRouter()
+	
+	r.HandleFunc("/root", getRoot).Methods(http.MethodGet)
+	r.HandleFunc("/obj/{name}", getObject).Methods(http.MethodGet)
+	r.HandleFunc("/weather", getWeather).Methods(http.MethodGet)
+	r.NotFoundHandler = http.HandlerFunc(notFound)
+	
+	// This will server something like
+	// http://192.168.1.10:8080/light/25/on
+	//r.HandleFunc("/light/{lightId}/{action}", getLight).Methods(http.MethodGet)
+	//r.HandleFunc("/lights/{action}", getLight).Methods(http.MethodGet)
+
+
+	/*
+	r.HandleFunc("/", post).Methods(http.MethodPost)
+	r.HandleFunc("/", put).Methods(http.MethodPut)
+	r.HandleFunc("/", delete).Methods(http.MethodDelete)
+	r.HandleFunc("/", notFound)
+	*/
+	
+	log.Fatal(http.ListenAndServe(":8080", r))
+}
+
