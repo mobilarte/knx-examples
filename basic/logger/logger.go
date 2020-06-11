@@ -86,6 +86,7 @@ func writeToFile() {
 	}
 	defer f.Close()
 
+	logMutex.Lock()
 	for _, row := range logEntries {
 		s := fmt.Sprintf("%s,%s,%s\n", row.time, row.src, row.value)
 		_, err := f.WriteString(s)
@@ -93,6 +94,7 @@ func writeToFile() {
 			log.Println("Cannot write to file: #%v\n", row)
 		}
 	}
+	logMutex.Unlock()
 	logEntries = nil
 	f.Sync()
 }
@@ -105,13 +107,11 @@ func main() {
 		for {
 			sig := <-sigs
 			fmt.Printf("Signal %s received, flushing logs to file %s\n", sig, FILENAME)
-			logMutex.Lock()
 			writeToFile()
 			entryCounter = 0
-			logMutex.Unlock()
 			if sig != syscall.SIGUSR1 {
 				os.Exit(0)
-			} 
+			}
 		}
 	}()
 
@@ -128,10 +128,7 @@ func main() {
 		} else if message.Source == srcAddr && message.Command == knx.GroupWrite {
 			logData(message)
 			if len(logEntries) == FLUSH_FREQUENCY {
-				log.Println("Flushing to disk")
-				logMutex.Lock()
 				writeToFile()
-				logMutex.Unlock()
 			}
 		}
 	}
