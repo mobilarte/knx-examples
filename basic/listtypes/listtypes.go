@@ -1,6 +1,9 @@
 // Copyright 2020 Martin Müller.
 // Licensed under the MIT license which can be found in the LICENSE file.
 
+// Prints a list of supported DPTs, with default value and unit.
+// Does not work with the original knx-go library, because of
+// missing function IsValid() on dpts.
 package main
 
 import (
@@ -40,7 +43,7 @@ func main() {
 	fmt.Println("List of known DPTs")
 	fmt.Println()
 
-	fmt.Printf("%10s %25s %35s\n", "DPT", "Default Value", "Unit")
+	fmt.Printf("%10s %25s %6s %35s\n", "DPT", "Default Value", "Valid?", "Unit")
 	keys := dpt.ListSupportedTypes()
 	sort.Sort(byMe(keys))
 
@@ -49,7 +52,7 @@ func main() {
 		// Trying to pack and unpack
 		buf := d.Pack()
 		d.Unpack(buf)
-		fmt.Printf("%10s %25s %35s\n", key, d, d.(dpt.DatapointMeta).Unit())
+		fmt.Printf("%10s %25s %6t %35s\n", key, d, d.IsValid(), d.(dpt.DatapointMeta).Unit())
 	}
 	fmt.Println("")
 }
