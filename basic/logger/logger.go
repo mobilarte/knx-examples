@@ -9,15 +9,16 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/vapourismo/knx-go/knx"
-	"github.com/vapourismo/knx-go/knx/cemi"
-	"github.com/vapourismo/knx-go/knx/dpt"
 	"log"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/vapourismo/knx-go/knx"
+	"github.com/vapourismo/knx-go/knx/cemi"
+	"github.com/vapourismo/knx-go/knx/dpt"
 )
 
 const (
